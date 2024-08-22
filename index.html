@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Location Form</title>
+</head>
+<body>
+  <h1>Submit Your Location</h1>
+  <form id="locationForm">
+    <label for="id">Enter your ID:</label><br>
+    <input type="text" id="id" name="id" required><br><br>
+    <input type="hidden" id="latitude" name="latitude">
+    <input type="hidden" id="longitude" name="longitude">
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if geolocation is available
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          // Set the latitude and longitude in the form fields
+          document.getElementById('latitude').value = position.coords.latitude;
+          document.getElementById('longitude').value = position.coords.longitude;
+        }, function(error) {
+          alert('Error: Unable to retrieve your location.');
+        });
+      } else {
+        alert('Geolocation is not supported by this browser.');
+      }
+    });
+
+    // Submit form data to Google Sheets
+    document.getElementById('locationForm').onsubmit = function(event) {
+      event.preventDefault();
+
+      var formData = new FormData(document.getElementById('locationForm'));
+      var formObject = {};
+      formData.forEach((value, key) => { formObject[key] = value });
+
+      fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(formObject)
+      }).then(response => {
+        alert('Your location has been submitted!');
+        document.getElementById('locationForm').reset();
+      }).catch(error => {
+        alert('Error: ' + error.message);
+      });
+    };
+  </script>
+</body>
+</html>
